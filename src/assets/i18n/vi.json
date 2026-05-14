@@ -1,0 +1,12 @@
+{
+  "accounts": {
+    "title": "Accounts",
+    "nav": {
+      "accounts": "Accounts",
+      "ops": "Account Management"
+    },
+    "ops": {
+      "title": "Account Management"
+    }
+  }
+}
