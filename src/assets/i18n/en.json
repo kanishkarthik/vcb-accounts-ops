@@ -5,7 +5,7 @@
       "accounts": "Accounts",
       "ops": "Account Management"
     },
-    "ops": {
+    "management": {
       "title": "Account Management"
     }
   }

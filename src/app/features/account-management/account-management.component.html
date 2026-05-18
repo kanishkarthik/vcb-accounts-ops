@@ -1,0 +1,301 @@
+<!-- Account Management Container Component Template -->
+<div class="account-management-container">
+  <!-- Header Section -->
+  <header class="account-management-header">
+    <h1>{{ 'accounts.management.title' | translate }}</h1>
+    
+    <div class="header-actions">
+      <button 
+        class="btn btn-secondary" 
+        (click)="refreshAccounts()"
+        [disabled]="isLoading()">
+        {{ 'common.refresh' | translate }}
+      </button>
+      
+      <button 
+        class="btn btn-secondary" 
+        (click)="exportToCSV()"
+        [disabled]="isLoading() || filteredAccounts().length === 0">
+        {{ 'common.export.csv' | translate }}
+      </button>
+      
+      <button 
+        class="btn btn-secondary" 
+        (click)="exportToExcel()"
+        [disabled]="isLoading() || filteredAccounts().length === 0">
+        {{ 'common.export.excel' | translate }}
+      </button>
+    </div>
+  </header>
+
+  <!-- Error Message -->
+  @if (error()) {
+    <div class="alert alert-error">
+      <span class="alert-icon">⚠️</span>
+      <span class="alert-message">{{ error() }}</span>
+      <button class="alert-close" (click)="updateState({ error: null })">×</button>
+    </div>
+  }
+
+  <!-- Tab Navigation -->
+  <nav class="account-tabs">
+    <button 
+      class="tab-button"
+      [class.active]="selectedAccountType() === 'current'"
+      (click)="onTabChange('current')">
+      {{ 'account.type.current' | translate }}
+    </button>
+    
+    <button 
+      class="tab-button"
+      [class.active]="selectedAccountType() === 'deposit'"
+      (click)="onTabChange('deposit')">
+      {{ 'account.type.deposit' | translate }}
+    </button>
+    
+    <button 
+      class="tab-button"
+      [class.active]="selectedAccountType() === 'loan'"
+      (click)="onTabChange('loan')">
+      {{ 'account.type.loan' | translate }}
+    </button>
+    
+    <button 
+      class="tab-button"
+      [class.active]="selectedAccountType() === 'virtual'"
+      (click)="onTabChange('virtual')">
+      {{ 'account.type.virtual' | translate }}
+    </button>
+  </nav>
+
+  <!-- Search and Filter Section -->
+  <section class="search-filters">
+    <div class="search-inputs">
+      <input 
+        type="text"
+        class="search-input"
+        [placeholder]="'account.search.accountNumber' | translate"
+        [value]="searchFilters().accountNumber || ''"
+        (input)="updateAccountNumberFilter($any($event.target).value)">
+      
+      <input 
+        type="text"
+        class="search-input"
+        [placeholder]="'account.search.accountName' | translate"
+        [value]="searchFilters().accountName || ''"
+        (input)="updateAccountNameFilter($any($event.target).value)">
+      
+      <input 
+        type="text"
+        class="search-input"
+        [placeholder]="'account.search.accountAlias' | translate"
+        [value]="searchFilters().accountAlias || ''"
+        (input)="updateAccountAliasFilter($any($event.target).value)">
+      
+      <select 
+        class="search-select"
+        [value]="searchFilters().currency || ''"
+        (change)="updateCurrencyFilter($any($event.target).value)">
+        <option value="">{{ 'account.filter.allCurrencies' | translate }}</option>
+        <option value="VND">VND</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="JPY">JPY</option>
+        <option value="CNY">CNY</option>
+      </select>
+      
+      <select 
+        class="search-select"
+        [value]="searchFilters().status || ''"
+        (change)="updateStatusFilter($any($event.target).value)">
+        <option value="">{{ 'account.filter.allStatuses' | translate }}</option>
+        <option value="active">{{ 'account.status.active' | translate }}</option>
+        <option value="inactive">{{ 'account.status.inactive' | translate }}</option>
+        <option value="closed">{{ 'account.status.closed' | translate }}</option>
+      </select>
+      
+      <button 
+        class="btn btn-link"
+        (click)="clearFilters()">
+        {{ 'common.clearFilters' | translate }}
+      </button>
+    </div>
+  </section>
+
+  <!-- Balance Summary -->
+  <section class="balance-summary">
+    <div class="summary-card">
+      <h3>{{ 'account.summary.title' | translate }}</h3>
+      
+      <div class="summary-currencies">
+        @for (entry of balanceSummary() | keyvalue; track entry.key) {
+          <div class="currency-balance">
+            <span class="currency-code">{{ entry.key }}:</span>
+            <span class="balance-amount">{{ entry.value | number: preferences().numberFormat }}</span>
+          </div>
+        }
+      </div>
+      
+      <div class="summary-total">
+        <span class="total-label">{{ 'account.summary.totalVND' | translate }}:</span>
+        <span class="total-amount">{{ totalVNDBalance() | number: preferences().numberFormat }} VND</span>
+      </div>
+      
+      <div class="summary-count">
+        {{ 'account.summary.accountCount' | translate }}: {{ filteredAccounts().length }}
+      </div>
+    </div>
+  </section>
+
+  <!-- Account Grid Placeholder -->
+  <section class="account-grid-section">
+    @if (isLoading()) {
+      <div class="loading-overlay">
+        <div class="spinner"></div>
+        <p>{{ 'common.loading' | translate }}</p>
+      </div>
+    } @else {
+      <!-- TODO: Replace with actual AG Grid component in future tasks -->
+      <div class="account-list-placeholder">
+        <p class="placeholder-message">
+          {{ 'account.grid.placeholder' | translate }}
+        </p>
+        
+        @if (filteredAccounts().length > 0) {
+          <div class="account-count-info">
+            {{ filteredAccounts().length }} {{ 'account.grid.accountsFound' | translate }}
+          </div>
+          
+          <!-- Simple table for demonstration -->
+          <table class="simple-account-table">
+            <thead>
+              <tr>
+                <th>{{ 'account.column.accountNumber' | translate }}</th>
+                <th>{{ 'account.column.accountName' | translate }}</th>
+                <th>{{ 'account.column.status' | translate }}</th>
+                <th>{{ 'account.column.balance' | translate }}</th>
+                <th>{{ 'account.column.currency' | translate }}</th>
+                <th>{{ 'account.column.actions' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (account of filteredAccounts(); track account.id) {
+                <tr>
+                  <td>
+                    @if (account.isPrimaryCIF) {
+                      <span class="primary-indicator">⭐</span>
+                    }
+                    {{ account.accountNumber }}
+                  </td>
+                  <td>{{ account.accountName }}</td>
+                  <td>
+                    <span [class]="'status-badge status-' + account.accountStatus">
+                      {{ account.accountStatus }}
+                    </span>
+                  </td>
+                  <td>{{ account.currentBalance | number: preferences().numberFormat }}</td>
+                  <td>{{ account.currency }}</td>
+                  <td>
+                    <div class="action-buttons">
+                      <button 
+                        class="btn-icon"
+                        (click)="onActionTriggered({ type: 'view-details', account: account })"
+                        title="{{ 'account.action.viewDetails' | translate }}">
+                        👁️
+                      </button>
+                      <button 
+                        class="btn-icon"
+                        (click)="onActionTriggered({ type: 'view-transactions', account: account })"
+                        title="{{ 'account.action.viewTransactions' | translate }}">
+                        📋
+                      </button>
+                      <button 
+                        class="btn-icon"
+                        (click)="onActionTriggered({ type: 'create-transfer', account: account })"
+                        title="{{ 'account.action.createTransfer' | translate }}">
+                        💸
+                      </button>
+                      <button 
+                        class="btn-icon"
+                        (click)="onActionTriggered({ type: 'generate-qr', account: account })"
+                        title="{{ 'account.action.generateQR' | translate }}">
+                        📱
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <div class="no-accounts-message">
+            {{ 'account.grid.noAccounts' | translate }}
+          </div>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- Modal Placeholders -->
+  <!-- TODO: Replace with actual modal components in future tasks -->
+  
+  @if (modals().accountDetails && selectedAccount()) {
+    <div class="modal-overlay" (click)="closeModals()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ 'account.modal.details.title' | translate }}</h2>
+          <button class="modal-close" (click)="closeModals()">×</button>
+        </div>
+        <div class="modal-body">
+          <p>Account Details Modal - To be implemented</p>
+          <p>Account: {{ selectedAccount()?.accountNumber }}</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (modals().transactionHistory && selectedAccount()) {
+    <div class="modal-overlay" (click)="closeModals()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ 'account.modal.transactions.title' | translate }}</h2>
+          <button class="modal-close" (click)="closeModals()">×</button>
+        </div>
+        <div class="modal-body">
+          <p>Transaction History Modal - To be implemented</p>
+          <p>Account: {{ selectedAccount()?.accountNumber }}</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (modals().qrCode && selectedAccount()) {
+    <div class="modal-overlay" (click)="closeModals()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ 'account.modal.qrCode.title' | translate }}</h2>
+          <button class="modal-close" (click)="closeModals()">×</button>
+        </div>
+        <div class="modal-body">
+          <p>QR Code Modal - To be implemented</p>
+          <p>Account: {{ selectedAccount()?.accountNumber }}</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (modals().transfer && selectedAccount()) {
+    <div class="modal-overlay" (click)="closeModals()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ 'account.modal.transfer.title' | translate }}</h2>
+          <button class="modal-close" (click)="closeModals()">×</button>
+        </div>
+        <div class="modal-body">
+          <p>Transfer Form Modal - To be implemented</p>
+          <p>Source Account: {{ selectedAccount()?.accountNumber }}</p>
+        </div>
+      </div>
+    </div>
+  }
+</div>
